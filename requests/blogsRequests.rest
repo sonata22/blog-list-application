@@ -1,0 +1,13 @@
+POST http://localhost:3001/api/blogs/
+content-type: application/json
+
+{
+    "title": "Linux Commands Cheat Sheet",
+    "author": "Serverspace.us",
+    "url": "https://dev.to/serverspace/linux-commands-cheat-sheet-aif",
+    "likes": 53
+}
+
+###
+GET http://localhost:3001/api/blogs
+content-type: application/json
