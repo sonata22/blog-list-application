@@ -32,9 +32,26 @@ const favoriteBlog = (blogs) => {
     return {}
 }
 
+const mostBlogs = (blogs) => {
+    if (blogs.length) {
+        const authors = blogs.map(blog => blog.author)
+        let authorBlogsNum = {}
+        authors.forEach(author => {
+            authorBlogsNum[author] = (authorBlogsNum[author] || 0) + 1
+        })
+        let maxBlogsNum = Math.max(...Object.values(authorBlogsNum))
+        return {
+            author: Object.keys(authorBlogsNum).find(key => authorBlogsNum[key] === maxBlogsNum),
+            blogs: maxBlogsNum
+        }
+    }
+    return {}
+}
+
 module.exports = {
     reverse,
     average,
     totalLikes,
-    favoriteBlog
+    favoriteBlog,
+    mostBlogs
 }
