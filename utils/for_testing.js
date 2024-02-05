@@ -48,10 +48,30 @@ const mostBlogs = (blogs) => {
     return {}
 }
 
+const mostLikes = (blogs) => {
+    if (blogs.length) {
+        const likesTotalPerAuthor = blogs.reduce((likesPerAuthor, blog) => {
+            likesPerAuthor[blog.author] = likesPerAuthor[blog.author] || 0
+            likesPerAuthor[blog.author] += blog.likes
+            console.log(likesPerAuthor)
+            return likesPerAuthor
+        }, {})
+        const maxLikesTotalPerAuthor = Math.max(...Object.values(likesTotalPerAuthor))
+        return {
+            author: Object
+                .keys(likesTotalPerAuthor)
+                .find(key => likesTotalPerAuthor[key] === maxLikesTotalPerAuthor),
+            likes: maxLikesTotalPerAuthor,
+        }
+    }
+    return {}
+}
+
 module.exports = {
     reverse,
     average,
     totalLikes,
     favoriteBlog,
-    mostBlogs
+    mostBlogs,
+    mostLikes
 }
