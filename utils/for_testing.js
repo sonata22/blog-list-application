@@ -15,7 +15,14 @@ const average = (array) => {
         : array.reduce(reducer, 0) / array.length
 }
 
+const totalLikes = (blogs) => {
+    return blogs.length === 0
+        ? 0
+        : blogs.reduce((acc, value) => acc + value.likes, 0)
+}
+
 module.exports = {
     reverse,
     average,
+    totalLikes
 }
