@@ -60,6 +60,47 @@ test('a specific blog is within a returned blogs', async () => {
     )
 })
 
+test('a valid blog can be added', async () => {
+    const newBlog = {
+        title: 'async/await simplifies making async calls',
+        author: 'Humble me',
+        url: 'https://www.google.com',
+        likes: "99",
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const response = await api.get('/api/blogs')
+
+    const contents = response.body.map(r => r.title)
+
+    expect(response.body).toHaveLength(initialBlogs.length + 1)
+    expect(contents).toContain(
+        'async/await simplifies making async calls'
+    )
+})
+
+test('blog without content is not added', async () => {
+    const newBlog = {
+        author: "Mummin",
+        url: 'https://google.com',
+        likes: '57',
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(400)
+
+    const response = await api.get('/api/blogs')
+
+    expect(response.body).toHaveLength(initialBlogs.length)
+})
+
 afterAll(async () => {
     await mongoose.connection.close()
 })
