@@ -17,11 +17,12 @@ const Blog = require('../models/blog')
 beforeEach(async () => {
     await Blog.deleteMany({})
 
-    let blogObject = new Blog(helper.initialBlogs[0])
-    await blogObject.save()
-
-    blogObject = new Blog(helper.initialBlogs[1])
-    await blogObject.save()
+    // each 'forEach' generates asynchronous operation
+    // 'beforeEach' won't wait for them to finish executing
+    helper.initialBlogs.forEach(async (blog) => {
+        let blogObject = new Blog(blog)
+        await blogObject.save()
+    })
 })
 
 test('a specific blog can be viewed', async () => {
@@ -107,7 +108,7 @@ test('a valid blog can be added', async () => {
 
 test('blog without content is not added', async () => {
     const newBlog = {
-        author: "Mummin",
+        author: "Moomin",
         url: 'https://google.com',
         likes: '57',
     }

@@ -6,7 +6,7 @@ blogsRouter.get('/', async (request, response) => {
     response.json(blogs)
 })
 
-blogsRouter.post('/', async (request, response, next) => {
+blogsRouter.post('/', async (request, response) => {
     const blog = new Blog(request.body)
 
     if (!blog.title) {
@@ -17,7 +17,7 @@ blogsRouter.post('/', async (request, response, next) => {
     }
 })
 
-blogsRouter.get('/:id', async (request, response, next) => {
+blogsRouter.get('/:id', async (request, response) => {
     const blog = await Blog.findById(request.params.id)
     if (blog) {
         response.json(blog)
@@ -26,7 +26,7 @@ blogsRouter.get('/:id', async (request, response, next) => {
     }
 })
 
-blogsRouter.delete('/:id', async (request, response, next) => {
+blogsRouter.delete('/:id', async (request, response) => {
     await Blog.findByIdAndRemove(request.params.id)
     response.status(204).end()
 })
