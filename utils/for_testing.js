@@ -1,3 +1,5 @@
+const _ = require('lodash')
+
 const reverse = (string) => {
     return string
         .split('')
