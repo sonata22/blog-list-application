@@ -55,7 +55,6 @@ const mostLikes = (blogs) => {
         const likesTotalPerAuthor = blogs.reduce((likesPerAuthor, blog) => {
             likesPerAuthor[blog.author] = likesPerAuthor[blog.author] || 0
             likesPerAuthor[blog.author] += blog.likes
-            console.log(likesPerAuthor)
             return likesPerAuthor
         }, {})
         const maxLikesTotalPerAuthor = Math.max(...Object.values(likesTotalPerAuthor))

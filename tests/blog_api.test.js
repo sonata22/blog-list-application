@@ -24,6 +24,42 @@ beforeEach(async () => {
     await blogObject.save()
 })
 
+test('a specific blog can be viewed', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+
+    const blogToView = blogsAtStart[0]
+
+    const resultBlog = await api
+        .get(`/api/blogs/${blogToView.id}`)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+    const processedBlogToView = JSON.parse(JSON.stringify(blogToView))
+    console.log("resultBlogs BODY::::", resultBlog.body)
+    console.log("blogsToViewBlogs BODY::::", blogToView)
+    expect(resultBlog.body).toEqual(blogToView)
+})
+
+test('a blog can be deleted', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+
+
+    await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .expect(204)
+
+    const blogsAtEnd = await helper.blogsInDb()
+
+    expect(blogsAtEnd).toHaveLength(
+        helper.initialBlogs.length - 1
+    )
+
+    const contents = blogsAtEnd.map(r => r.title)
+
+    expect(contents).not.toContain(blogToDelete.title)
+})
+
 test('blogs are returned as json', async () => {
     await api
         .get('/api/blogs')
