@@ -12,35 +12,23 @@ blogsRouter.post('/', async (request, response, next) => {
     if (!blog.title) {
         response.status(400).json("Blog title is missing")
     } else {
-        try {
-            const savedBlog = await blog.save()
-            response.status(201).json(savedBlog)
-        } catch (exception) {
-            next(exception)
-        }
+        const savedBlog = await blog.save()
+        response.status(201).json(savedBlog)
     }
 })
 
 blogsRouter.get('/:id', async (request, response, next) => {
-    try {
-        const blog = await Blog.findById(request.params.id)
-        if (blog) {
-            response.json(blog)
-        } else {
-            response.status(404).end()
-        }
-    } catch (exception) {
-        next(exception)
+    const blog = await Blog.findById(request.params.id)
+    if (blog) {
+        response.json(blog)
+    } else {
+        response.status(404).end()
     }
 })
 
 blogsRouter.delete('/:id', async (request, response, next) => {
-    try {
-        await Blog.findByIdAndRemove(request.params.id)
-        response.status(204).end()
-    } catch (exception) {
-        next(exception)
-    }
+    await Blog.findByIdAndRemove(request.params.id)
+    response.status(204).end()
 })
 
 blogsRouter.put('/:id', (request, response, next) => {
