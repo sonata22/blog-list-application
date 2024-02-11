@@ -1,5 +1,6 @@
-const mongoose = require('mongoose')
 const supertest = require('supertest')
+const mongoose = require('mongoose')
+const helper = require('./test_helper')
 const app = require('../app')
 //mongoose.set("bufferTimeoutMS", 30000)
 
@@ -13,26 +14,13 @@ const api = supertest(app)
 
 const Blog = require('../models/blog')
 
-const initialBlogs = [
-    {
-        title: 'HTML is easy',
-        author: 'Herbert',
-        url: 'https://www.wikipedia.org/',
-        likes: '15',
-    },
-    {
-        title: 'Browser can execute only JavaScript',
-        author: 'Rudolf',
-        url: 'https://www.wikipedia.org/',
-        likes: '2',
-    }
-]
-
 beforeEach(async () => {
     await Blog.deleteMany({})
-    let blogObject = new Blog(initialBlogs[0])
+
+    let blogObject = new Blog(helper.initialBlogs[0])
     await blogObject.save()
-    blogObject = new Blog(initialBlogs[1])
+
+    blogObject = new Blog(helper.initialBlogs[1])
     await blogObject.save()
 })
 
@@ -48,7 +36,7 @@ test('all blogs are returned', async () => {
 
     // execution gets here only after the HTTP request is complete
     // the result of HTTP request is saved in variable response
-    expect(response.body).toHaveLength(initialBlogs.length)
+    expect(response.body).toHaveLength(helper.initialBlogs.length)
 })
 
 test('a specific blog is within a returned blogs', async () => {
@@ -74,11 +62,11 @@ test('a valid blog can be added', async () => {
         .expect(201)
         .expect('Content-Type', /application\/json/)
 
-    const response = await api.get('/api/blogs')
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
 
-    const contents = response.body.map(r => r.title)
+    const contents = blogsAtEnd.map(b => b.title)
 
-    expect(response.body).toHaveLength(initialBlogs.length + 1)
     expect(contents).toContain(
         'async/await simplifies making async calls'
     )
@@ -96,9 +84,9 @@ test('blog without content is not added', async () => {
         .send(newBlog)
         .expect(400)
 
-    const response = await api.get('/api/blogs')
+    const blogsAtEnd = await helper.blogsInDb()
 
-    expect(response.body).toHaveLength(initialBlogs.length)
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
 
 afterAll(async () => {
