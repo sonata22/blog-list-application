@@ -17,12 +17,12 @@ const Blog = require('../models/blog')
 beforeEach(async () => {
     await Blog.deleteMany({})
 
-    // each 'forEach' generates asynchronous operation
-    // 'beforeEach' won't wait for them to finish executing
-    helper.initialBlogs.forEach(async (blog) => {
-        let blogObject = new Blog(blog)
-        await blogObject.save()
-    })
+    // this way we wait for all promises to finish executing before
+    // starting to run test cases
+    const blogObjects = helper.initialBlogs
+        .map(blog => new Blog(blog))
+    const promiseArray = blogObjects.map(blog => blog.save())
+    await Promise.all(promiseArray)
 })
 
 test('a specific blog can be viewed', async () => {
