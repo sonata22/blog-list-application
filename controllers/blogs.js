@@ -7,10 +7,19 @@ blogsRouter.get('/', async (request, response) => {
 })
 
 blogsRouter.post('/', async (request, response) => {
-    const blog = new Blog(request.body)
+    const body = request.body
+
+    const blog = new Blog({
+        title: body.title,
+        author: body.author,
+        url: body.url,
+        likes: body.likes || 0,
+    })
 
     if (!blog.title) {
         response.status(400).json("Blog title is missing")
+    } else if (!blog.url){
+        response.status(400).json("Blog url is missing")
     } else {
         const savedBlog = await blog.save()
         response.status(201).json(savedBlog)
@@ -34,12 +43,12 @@ blogsRouter.delete('/:id', async (request, response) => {
 blogsRouter.put('/:id', (request, response, next) => {
     const body = request.body
 
-    const blog = {
+    const blog = new Blog({
         title: body.title,
         author: body.author,
         url: body.url,
         likes: body.likes,
-    }
+    })
 
     Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
         .then(updatedBlog => {

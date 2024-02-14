@@ -59,10 +59,20 @@ test('a blog can be deleted', async () => {
 })
 
 test('blogs are returned as json', async () => {
-    await api
+    const response = await api
         .get('/api/blogs')
         .expect(200)
         .expect('Content-Type', /application\/json/)
+    expect(response.body).toHaveLength(helper.initialBlogs.length)
+}, 100000)
+
+test('blogs have id property defined', async () => {
+    const response = await api
+        .get('/api/blogs')
+        .expect(200)
+    response.body.forEach(blog =>
+        expect(blog.id).toBeDefined()
+    )
 }, 100000)
 
 test('all blogs are returned', async () => {
@@ -104,6 +114,52 @@ test('a valid blog can be added', async () => {
     expect(contents).toContain(
         'async/await simplifies making async calls'
     )
+})
+
+test('verify likes equal to 0 if not defined', async () => {
+    const newBlog = {
+        title: 'async/await simplifies making async calls',
+        author: 'Humble me',
+        url: 'https://www.google.com',
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+    const contents = blogsAtEnd.map(b => b.likes)
+
+    expect(contents).toContain(0)
+})
+
+test('verify blog is not created if title is missing', async () => {
+    const newBlog = {
+        author: 'Humble me',
+        url: 'https://www.google.com',
+        likes: 3,
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(400)
+})
+
+test('verify blog is not created if url is missing', async () => {
+    const newBlog = {
+        title: 'async/await simplifies making async calls',
+        author: 'Humble me',
+        likes: 3,
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(400)
 })
 
 test('blog without content is not added', async () => {
