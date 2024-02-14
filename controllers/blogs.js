@@ -20,6 +20,8 @@ blogsRouter.post('/', async (request, response) => {
         response.status(400).json("Blog title is missing")
     } else if (!blog.url){
         response.status(400).json("Blog url is missing")
+    } else if (!blog.author) {
+        response.status(400).json("Blog author is missing")
     } else {
         const savedBlog = await blog.save()
         response.status(201).json(savedBlog)

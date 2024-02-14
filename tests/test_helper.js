@@ -20,7 +20,7 @@ const nonExistingId = async () => {
     await blog.save()
     await blog.deleteOne()
 
-    return note._id.toString()
+    return blog._id.toString()
 }
 
 const blogsInDb = async () => {
