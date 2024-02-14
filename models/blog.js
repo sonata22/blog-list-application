@@ -7,7 +7,7 @@ const blogSchema = new mongoose.Schema({
     likes: Number
 })
 
-blogSchema.set('toJSON', {
+blogSchema.set('toJSON', { //new method
     virtuals: true,
     versionKey: false,
     transform: (document, returnedObject) => {

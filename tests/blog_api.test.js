@@ -180,7 +180,7 @@ describe('when there is initially some blogs saved', () => {
     })
 
     describe('deletion of a blog', () => {
-        test('a blog can be deleted', async () => {
+        test('blog is deleted if data is valid', async () => {
             const blogsAtStart = await helper.blogsInDb()
             const blogToDelete = blogsAtStart[0]
 
@@ -198,6 +198,20 @@ describe('when there is initially some blogs saved', () => {
             const contents = blogsAtEnd.map(r => r.title)
 
             expect(contents).not.toContain(blogToDelete.title)
+        })
+
+        test('blog is not deleted if data is invalid', async () => {
+            const validNonexistingId = await helper.nonExistingId()
+
+            await api
+                .delete(`/api/blogs/${validNonexistingId}`)
+                .expect(204)
+
+            const blogsAtEnd = await helper.blogsInDb()
+
+            expect(blogsAtEnd).toHaveLength(
+                helper.initialBlogs.length
+            )
         })
 
     })
@@ -232,6 +246,83 @@ describe('when there is initially some blogs saved', () => {
             expect(contents).toContain(0)
         })
 
+    })
+
+    describe('blog editing', () => {
+        test('number of likes can be edited', async () => {
+            const response = await api.get('/api/blogs')
+            const firstDbBlog = response.body[0]
+            const editedBlog = {
+                title: firstDbBlog.title,
+                author: firstDbBlog.author,
+                url: firstDbBlog.url,
+                likes: 237493,
+                id: firstDbBlog.id,
+            }
+
+            const editedBlogFetched = await api
+                .put(`/api/blogs/${editedBlog.id}`)
+                .send(editedBlog)
+                .expect(200)
+            expect(editedBlogFetched.body.likes).toEqual(editedBlog.likes)
+        })
+
+        test('title can be edited', async () => {
+            const response = await api.get('/api/blogs')
+            const firstDbBlog = response.body[0]
+            const editedBlog = {
+                title: "OhoHO, the title was changed",
+                author: firstDbBlog.author,
+                url: firstDbBlog.url,
+                likes: firstDbBlog.likes,
+                id: firstDbBlog.id,
+            }
+
+            const editedBlogFetched = await api
+                .put(`/api/blogs/${editedBlog.id}`)
+                .send(editedBlog)
+                .expect(200)
+            expect(editedBlogFetched.body.title).toEqual(editedBlog.title)
+        })
+
+        test('author can be edited', async () => {
+            const response = await api.get('/api/blogs')
+            const firstDbBlog = response.body[0]
+            const editedBlog = {
+                title: firstDbBlog.title,
+                author: "Nataliia Samoilenko",
+                url: firstDbBlog.url,
+                likes: firstDbBlog.likes,
+                id: firstDbBlog.id,
+            }
+
+            const editedBlogFetched = await api
+                .put(`/api/blogs/${editedBlog.id}`)
+                .send(editedBlog)
+                .expect(200)
+            expect(editedBlogFetched.body.author).toEqual(editedBlog.author)
+        })
+
+        test('blog can be edited', async () => {
+            const response = await api.get('/api/blogs')
+            const firstDbBlog = response.body[0]
+            const editedBlog = {
+                title: "The new era of AI",
+                author: "Natali Samoilenko",
+                url: "https://www.google.com/",
+                likes: 89375934758349,
+                id: firstDbBlog.id,
+            }
+
+            const editedBlogFetched = await api
+                .put(`/api/blogs/${editedBlog.id}`)
+                .send(editedBlog)
+                .expect(200)
+            expect(editedBlogFetched.body.author).toEqual(editedBlog.author)
+            expect(editedBlogFetched.body.title).toEqual(editedBlog.title)
+            expect(editedBlogFetched.body.url).toEqual(editedBlog.url)
+            expect(editedBlogFetched.body.likes).toEqual(editedBlog.likes)
+        })
     })
 
 })

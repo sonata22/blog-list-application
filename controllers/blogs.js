@@ -18,7 +18,7 @@ blogsRouter.post('/', async (request, response) => {
 
     if (!blog.title) {
         response.status(400).json("Blog title is missing")
-    } else if (!blog.url){
+    } else if (!blog.url) {
         response.status(400).json("Blog url is missing")
     } else if (!blog.author) {
         response.status(400).json("Blog author is missing")
@@ -42,21 +42,19 @@ blogsRouter.delete('/:id', async (request, response) => {
     response.status(204).end()
 })
 
-blogsRouter.put('/:id', (request, response, next) => {
-    const body = request.body
+blogsRouter.put('/:id', async (request, response) => {
+    const { title, author, url, likes } = request.body
 
-    const blog = new Blog({
-        title: body.title,
-        author: body.author,
-        url: body.url,
-        likes: body.likes,
-    })
-
-    Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
-        .then(updatedBlog => {
-            response.json(updatedBlog)
-        })
-        .catch(error => next(error))
+    const updatedBlog = await Blog.findByIdAndUpdate(
+        request.params.id,
+        { title, author, url, likes },
+        {
+            new: true,
+            runValidators: true,
+            context: 'query'
+        }
+    )
+    response.json(updatedBlog)
 })
 
 module.exports = blogsRouter
