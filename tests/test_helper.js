@@ -11,7 +11,7 @@ const initialBlogs = [
     {
         title: 'Browser can execute only JavaScript',
         author: 'Rudolf',
-        url: 'https://www.wikipedia.org/',
+        url: 'https://google.com/',
         likes: '2',
     }
 ]

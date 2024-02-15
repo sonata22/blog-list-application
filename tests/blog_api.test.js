@@ -2,6 +2,7 @@ const supertest = require('supertest')
 const mongoose = require('mongoose')
 const helper = require('./test_helper')
 const app = require('../app')
+const bcrypt = require('bcrypt')
 //mongoose.set("bufferTimeoutMS", 30000)
 
 // The tests only use the express application defined in the app.js file, which does not
@@ -13,11 +14,21 @@ const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 beforeEach(async () => {
     await Blog.deleteMany({})
+    await User.deleteMany({})
 
-    // this way we wait for all promises to finish executing before
+    const passwordHash = await bcrypt.hash('secret', 10)
+    const user = new User({
+        username: 'admin',
+        name: 'Jordan',
+        passwordHash
+    })
+    await user.save()
+
+    // we wait for all promises to finish executing before
     // starting to run test cases
     const blogObjects = helper.initialBlogs
         .map(blog => new Blog(blog))
@@ -98,11 +109,15 @@ describe('when there is initially some blogs saved', () => {
 
     describe('addition of a new blog', () => {
         test('a valid blog can be added', async () => {
+            const users = await User.find({})
+            const adminUser = users.find(user => user.username === "admin")
+
             const newBlog = {
                 title: 'async/await simplifies making async calls',
                 author: 'Humble me',
                 url: 'https://www.google.com',
                 likes: "99",
+                userId: adminUser.id,
             }
 
             await api
@@ -122,10 +137,14 @@ describe('when there is initially some blogs saved', () => {
         })
 
         test('verify blog is not created if title is missing', async () => {
+            const users = await User.find({})
+            const adminUser = users.find(user => user.username === "admin")
+
             const newBlog = {
                 author: 'Humble me',
                 url: 'https://www.google.com',
                 likes: 3,
+                userId: adminUser.id,
             }
 
             await api
@@ -135,10 +154,14 @@ describe('when there is initially some blogs saved', () => {
         })
 
         test('blog without title is not added', async () => {
+            const users = await User.find({})
+            const adminUser = users.find(user => user.username === "admin")
+
             const newBlog = {
                 author: "Moomin",
                 url: 'https://google.com',
                 likes: '57',
+                userId: adminUser.id,
             }
 
             await api
@@ -152,10 +175,14 @@ describe('when there is initially some blogs saved', () => {
         })
 
         test('verify blog is not created if url is missing', async () => {
+            const users = await User.find({})
+            const adminUser = users.find(user => user.username === "admin")
+
             const newBlog = {
                 title: 'async/await simplifies making async calls',
                 author: 'Humble me',
                 likes: 3,
+                userId: adminUser.id,
             }
 
             await api
@@ -165,10 +192,14 @@ describe('when there is initially some blogs saved', () => {
         })
 
         test('verify blog is not created if author is missing', async () => {
+            const users = await User.find({})
+            const adminUser = users.find(user => user.username === "admin")
+
             const newBlog = {
                 title: 'async/await simplifies making async calls',
                 url: 'https://www.google.com',
                 likes: 3,
+                userId: adminUser.id,
             }
 
             await api
@@ -183,7 +214,6 @@ describe('when there is initially some blogs saved', () => {
         test('blog is deleted if data is valid', async () => {
             const blogsAtStart = await helper.blogsInDb()
             const blogToDelete = blogsAtStart[0]
-
 
             await api
                 .delete(`/api/blogs/${blogToDelete.id}`)
@@ -227,10 +257,14 @@ describe('when there is initially some blogs saved', () => {
         }, 100000)
 
         test('verify likes equal to 0 if not defined', async () => {
+            const users = await User.find({})
+            const adminUser = users.find(user => user.username === "admin")
+
             const newBlog = {
                 title: 'async/await simplifies making async calls',
                 author: 'Humble me',
                 url: 'https://www.google.com',
+                userId: adminUser.id,
             }
 
             await api

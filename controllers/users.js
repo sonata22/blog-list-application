@@ -17,4 +17,14 @@ usersRouter.post('/', async (request, response) => {
     response.status(201).json(savedUser)
 })
 
+usersRouter.get('/', async (request, response) => {
+    const users = await User
+        .find({})
+        .populate('blogs') //populates blogs for each user
+    // we can also choose hte only fields we want to show
+    // .populate('blogs', { author: 1, likes: 1, title: 1, })
+
+    response.json(users)
+})
+
 module.exports = usersRouter

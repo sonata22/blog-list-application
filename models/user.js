@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     passwordHash: String,
     blogs: [
         {
-            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId, // for populate to work
             ref: 'Blog'
         }
     ],
