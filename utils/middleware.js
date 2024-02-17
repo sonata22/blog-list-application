@@ -1,18 +1,18 @@
 const logger = require('./logger')
 
 const tokenExtractor = (request, response, next) => {
-    console.log("*** TOKEN EXTRACTION ***")
-    console.log("Extracting token from the Authorization header...")
+    // console.log("*** TOKEN EXTRACTION ***")
+    // console.log("Extracting token from the Authorization header...")
     const authorization = request.get('authorization')
 
     if (authorization && authorization.startsWith('Bearer ')) {
-        console.log("Authorization method: Bearer")
-        console.log("Getting rid of 'Bearer' prefix...")
+        // console.log("Authorization method: Bearer")
+        // console.log("Getting rid of 'Bearer' prefix...")
         const extractedToken = authorization.replace('Bearer ', '')
-        console.log("Adding pure token to request's 'token' property...")
+        // console.log("Adding pure token to request's 'token' property...")
         request['token'] = extractedToken
-        console.log("Done...")
-        console.log("************************")
+        // console.log("Done...")
+        // console.log("************************")
     } else {
         console.log("Token extraction from authorization header went wrong.")
     }
