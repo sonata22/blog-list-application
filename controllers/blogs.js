@@ -32,12 +32,12 @@ blogsRouter.post('/', async (request, response) => {
         author: body.author,
         url: body.url,
         likes: body.likes || 0,
-        user: user.id,
+        user: user._id.toString(),
     })
 
     if (body.title === undefined || body.author === undefined ||
-        body.url === undefined || body.userId === undefined) {
-        response.status(400).end()
+        body.url === undefined) {
+        response.status(400).json("title, url or author are undefined").end()
     } else {
         const savedBlog = await blog.save()
         user.blogs = user.blogs.concat(savedBlog._id)

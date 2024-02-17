@@ -20,6 +20,8 @@ const userSchema = new mongoose.Schema({
 })
 
 userSchema.set('toJSON', {
+    virtuals: true,
+    versionKey: false,
     transform: (document, returnedObject) => {
         returnedObject.id = returnedObject._id.toString()
         delete returnedObject._id
