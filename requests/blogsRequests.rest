@@ -11,3 +11,17 @@ content-type: application/json
 ###
 GET http://localhost:3001/api/blogs
 content-type: application/json
+
+###
+
+POST http://localhost:3001/api/blogs
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sdXVra2FpIiwiaWQiOiI2NWQwZWNkYjdhNWU0YmI5Mzc5MTJiMDUiLCJpYXQiOjE3MDgxOTE5NDR9.o-hRRYeIwUQwhoKqohjlLJ7zILaGfXRfXblaK54GS4Q
+
+{
+    "title": "This is a new blogpost, yay!",
+    "author": "Humble meee",
+    "url": "https://www.google.com",
+    "likes": 3,
+    "userId": "65d0ecdb7a5e4bb937912b05"
+}

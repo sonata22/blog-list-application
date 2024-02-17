@@ -3,6 +3,7 @@ const express = require('express')
 require('express-async-errors') // before I export my routes
 const app = express()
 const cors = require('cors')
+const loginRouter = require('./controllers/login')
 const blogsRouter = require('./controllers/blogs')
 const usersRouter = require('./controllers/users')
 const middleware = require('./utils/middleware')
@@ -32,6 +33,7 @@ app.use(express.json())
 app.use(middleware.requestLogger)
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :reqBody'))     // using morgan middleware
 
+app.use('/api/login', loginRouter)
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
 
