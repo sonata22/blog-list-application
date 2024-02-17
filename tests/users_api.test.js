@@ -73,4 +73,105 @@ describe('when there is initially one user in db', () => {
 
             assert.strictEqual(usersAtEnd.length, usersAtStart.length)
         })
+
+    describe('insure invalid user is not created', () => {
+        test('if username undefined', async () => {
+            const initialUsersNum = await api
+                .get('/api/users/')
+                .expect(200)
+            assert.strictEqual(initialUsersNum.body.length, 1)
+            const newUser = {
+                username: undefined,
+                name: "Jonathan",
+                password: "simplePassword",
+            }
+            const result = await api
+                .post('/api/users')
+                .send(newUser)
+                .expect(400)
+                .expect('Content-Type', /application\/json/)
+
+            const error = (JSON.parse(result.error.text)).error
+            assert.strictEqual(
+                error,
+                'User validation failed: username: Username is mandatory.')
+            const finalUsersNum = await api
+                .get('/api/users/')
+                .expect(200)
+            assert.strictEqual(finalUsersNum.length, initialUsersNum.length)
+        })
+
+        test('if password undefined', async () => {
+            const initialUsersNum = await api
+                .get('/api/users/')
+                .expect(200)
+            assert.strictEqual(initialUsersNum.body.length, 1)
+            const newUser = {
+                username: "smarty",
+                name: "Jonathan",
+            }
+            const result = await api
+                .post('/api/users')
+                .send(newUser)
+                .expect(400)
+                .expect('Content-Type', /application\/json/)
+
+            const error = (JSON.parse(result.text)).error
+            assert.strictEqual(
+                error,
+                'Password is mandatory.')
+            const finalUsersNum = await api
+                .get('/api/users/')
+                .expect(200)
+            assert.strictEqual(finalUsersNum.length, initialUsersNum.length)
+        })
+
+        test('if username is under 3 chars', async () => {
+            const initialUsersNum = await api
+                .get('/api/users/')
+                .expect(200)
+            assert.strictEqual(initialUsersNum.body.length, 1)
+            const newUser = {
+                username: "Jo",
+                name: "Jonathan",
+                password: "simplePassword",
+            }
+            const result = await api
+                .post('/api/users/')
+                .send(newUser)
+                .expect(400)
+                .expect('Content-Type', /application\/json/)
+            const error = result.body.error
+            assert.strictEqual(error,
+                `User validation failed: username: Path \`username\` (\`${newUser.username}\`) is shorter than the minimum allowed length (3).`)
+            const finalUsersNum = await api
+                .get('/api/users/')
+                .expect(200)
+            assert.strictEqual(finalUsersNum.length, initialUsersNum.length)
+        })
+
+        test('if password is under 3 chars', async () => {
+            const initialUsersNum = await api
+                .get('/api/users/')
+                .expect(200)
+            assert.strictEqual(initialUsersNum.body.length, 1)
+            const newUser = {
+                username: "Joe",
+                name: "Jonathan",
+                password: "oo",
+            }
+            const result = await api
+                .post('/api/users/')
+                .send(newUser)
+                .expect(400)
+                .expect('Content-Type', /application\/json/)
+            const error = result.body.error
+            assert.strictEqual(error,
+                "Password must be at least 3 characters long.")
+            const finalUsersNum = await api
+                .get('/api/users/')
+                .expect(200)
+            assert.strictEqual(finalUsersNum.length, initialUsersNum.length)
+        })
+    })
 })
