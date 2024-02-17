@@ -1,4 +1,6 @@
 const logger = require('./logger')
+const jwt = require('jsonwebtoken')
+const User = require('../models/user')
 
 const tokenExtractor = (request, response, next) => {
     // console.log("*** TOKEN EXTRACTION ***")
@@ -17,6 +19,18 @@ const tokenExtractor = (request, response, next) => {
         console.log("Token extraction from authorization header went wrong.")
     }
 
+    next()
+}
+
+const userExtractor = async (request, response, next) => {
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    if (!decodedToken.id) {
+        return response.status(401).json({
+            error: 'userExtractor: Couldn\'t parse id from decoded token.'
+        })
+    }
+    request['user'] = await User.findById(decodedToken.id)
+    console.log("User extracted, showing request.user: ", request.user)
     next()
 }
 
@@ -64,6 +78,7 @@ const errorHandler = (error, request, response, next) => {
 
 module.exports = {
     tokenExtractor,
+    userExtractor,
     requestLogger,
     unknownEndpoint,
     errorHandler
