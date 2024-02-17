@@ -33,6 +33,7 @@ app.use(express.json())
 app.use(middleware.requestLogger)
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :reqBody'))     // using morgan middleware
 
+app.use(middleware.tokenExtractor)
 app.use('/api/login', loginRouter)
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)

@@ -1,5 +1,25 @@
 const logger = require('./logger')
 
+const tokenExtractor = (request, response, next) => {
+    console.log("*** TOKEN EXTRACTION ***")
+    console.log("Extracting token from the Authorization header...")
+    const authorization = request.get('authorization')
+
+    if (authorization && authorization.startsWith('Bearer ')) {
+        console.log("Authorization method: Bearer")
+        console.log("Getting rid of 'Bearer' prefix...")
+        const extractedToken = authorization.replace('Bearer ', '')
+        console.log("Adding pure token to request's 'token' property...")
+        request['token'] = extractedToken
+        console.log("Done...")
+        console.log("************************")
+    } else {
+        console.log("Token extraction from authorization header went wrong.")
+    }
+
+    next()
+}
+
 const requestLogger = (request, response, next) => {
     logger.info('Method:', request.method)
     logger.info('Path:  ', request.path)
@@ -15,7 +35,7 @@ const unknownEndpoint = (request, response) => {
 const errorHandler = (error, request, response, next) => {
     logger.error(error.message)
 
-    //in all other error situations, middlware passes error forward
+    //in all other error situations, middleware passes error forward
     // to default Express error handler
     if (error.name === 'CastError') {
         return response.status(400).send({
@@ -43,6 +63,7 @@ const errorHandler = (error, request, response, next) => {
 }
 
 module.exports = {
+    tokenExtractor,
     requestLogger,
     unknownEndpoint,
     errorHandler
