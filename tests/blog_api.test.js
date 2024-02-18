@@ -15,6 +15,7 @@ const api = supertest(app)
 
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const blog = require('../models/blog')
 
 beforeEach(async () => {
     await Blog.deleteMany({})
@@ -23,7 +24,7 @@ beforeEach(async () => {
     const passwordHash = await bcrypt.hash('secret', 10)
     const user = new User({
         username: 'admin',
-        name: 'Jordan',
+        name: 'admin',
         passwordHash
     })
     await user.save()
@@ -109,19 +110,23 @@ describe('when there is initially some blogs saved', () => {
 
     describe('addition of a new blog', () => {
         test('a valid blog can be added', async () => {
-            const users = await User.find({})
-            const adminUser = users.find(user => user.username === "admin")
-
+            const response = await api
+                .post('/api/login')
+                .send({
+                    "username": "admin",
+                    "password": "secret",
+                })
+                .expect(200)
             const newBlog = {
                 title: 'async/await simplifies making async calls',
                 author: 'Humble me',
                 url: 'https://www.google.com',
                 likes: "99",
-                userId: adminUser.id,
             }
-
             await api
                 .post('/api/blogs')
+                .set('Accept', 'application/json')
+                .set('Authorization', "Bearer " + response.body.token)
                 .send(newBlog)
                 .expect(201)
                 .expect('Content-Type', /application\/json/)
@@ -134,6 +139,27 @@ describe('when there is initially some blogs saved', () => {
             expect(contents).toContain(
                 'async/await simplifies making async calls'
             )
+        })
+
+        test('a valid blog is not added if token missing', async () => {
+            const blogs = await Blog.find({})
+            const contentsBefore = blogs.map(r => r.title)
+            expect(contentsBefore).not.toContain("async/await simplifies making async calls")
+            const newBlog = {
+                title: 'async/await simplifies making async calls',
+                author: 'Humble me',
+                url: 'https://www.google.com',
+                likes: "99",
+            }
+            await api
+                .post('/api/blogs')
+                .set('Accept', 'application/json')
+                .send(newBlog)
+                .expect(401)
+                .expect('Content-Type', /application\/json/)
+            const blogsAfter = await Blog.find({})
+            const contentsAfter = blogsAfter.map(r => r.title)
+            expect(contentsAfter).not.toContain("async/await simplifies making async calls")
         })
 
         test('verify blog is not created if title is missing', async () => {
@@ -212,36 +238,54 @@ describe('when there is initially some blogs saved', () => {
 
     describe('deletion of a blog', () => {
         test('blog is deleted if data is valid', async () => {
-            const blogsAtStart = await helper.blogsInDb()
-            const blogToDelete = blogsAtStart[0]
-
+            const response = await api
+                .post('/api/login')
+                .send({
+                    "username": "admin",
+                    "password": "secret",
+                })
+                .expect(200)
+            const newBlog = {
+                title: 'async/await simplifies making async calls',
+                author: 'Humble me',
+                url: 'https://www.google.com',
+                likes: "99",
+            }
+            const blogToDelete = await api
+                .post('/api/blogs')
+                .set('Accept', 'application/json')
+                .set('Authorization', "Bearer " + response.body.token)
+                .send(newBlog)
+                .expect(201)
+                .expect('Content-Type', /application\/json/)
+            const blogs = await Blog.find({})
+            const contentsBefore = blogs.map(r => r.title)
+            expect(contentsBefore).toContain("async/await simplifies making async calls")
             await api
-                .delete(`/api/blogs/${blogToDelete.id}`)
+                .delete(`/api/blogs/${blogToDelete.body.id}`)
+                .set('Accept', 'application/json')
+                .set('Authorization', "Bearer " + response.body.token)
                 .expect(204)
-
-            const blogsAtEnd = await helper.blogsInDb()
-
-            expect(blogsAtEnd).toHaveLength(
-                helper.initialBlogs.length - 1
-            )
-
-            const contents = blogsAtEnd.map(r => r.title)
-
-            expect(contents).not.toContain(blogToDelete.title)
+            const blogsAfter = await Blog.find({})
+            const contentsAfter = blogsAfter.map(r => r.title)
+            expect(contentsAfter).not.toContain("async/await simplifies making async calls")
         })
 
         test('blog is not deleted if data is invalid', async () => {
+            const response = await api
+                .post('/api/login')
+                .send({
+                    "username": "admin",
+                    "password": "secret",
+                })
+                .expect(200)
             const validNonexistingId = await helper.nonExistingId()
-
+            console.log("response.body.token", response.body.token)
             await api
                 .delete(`/api/blogs/${validNonexistingId}`)
-                .expect(204)
-
-            const blogsAtEnd = await helper.blogsInDb()
-
-            expect(blogsAtEnd).toHaveLength(
-                helper.initialBlogs.length
-            )
+                .set('Accept', 'application/json')
+                .set('Authorization', "Bearer " + response.body.token)
+                .expect(404)
         })
 
     })
@@ -257,18 +301,22 @@ describe('when there is initially some blogs saved', () => {
         }, 100000)
 
         test('verify likes equal to 0 if not defined', async () => {
-            const users = await User.find({})
-            const adminUser = users.find(user => user.username === "admin")
-
+            const response = await api
+                .post('/api/login')
+                .send({
+                    "username": "admin",
+                    "password": "secret",
+                })
+                .expect(200)
             const newBlog = {
                 title: 'async/await simplifies making async calls',
                 author: 'Humble me',
                 url: 'https://www.google.com',
-                userId: adminUser.id,
             }
-
             await api
                 .post('/api/blogs')
+                .set('Accept', 'application/json')
+                .set('Authorization', "Bearer " + response.body.token)
                 .send(newBlog)
                 .expect(201)
                 .expect('Content-Type', /application\/json/)

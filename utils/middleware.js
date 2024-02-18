@@ -16,7 +16,8 @@ const tokenExtractor = (request, response, next) => {
         // console.log("Done...")
         // console.log("************************")
     } else {
-        console.log("Token extraction from authorization header went wrong.")
+        // console.log("Token extraction from authorization header went wrong.")
+        return response.status(401).json("User is not authorized or authentication method is different.")
     }
 
     next()
