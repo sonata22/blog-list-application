@@ -3,21 +3,25 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 
 const tokenExtractor = (request, response, next) => {
-    // console.log("*** TOKEN EXTRACTION ***")
+    // console.log("debug: *** TOKEN EXTRACTION ***")
     // console.log("Extracting token from the Authorization header...")
     const authorization = request.get('authorization')
-
-    if (authorization && authorization.startsWith('Bearer ')) {
+    if (authorization && authorization.startsWith('Bearer')) {
         // console.log("Authorization method: Bearer")
         // console.log("Getting rid of 'Bearer' prefix...")
-        const extractedToken = authorization.replace('Bearer ', '')
+        const extractedToken = (authorization.replace('Bearer', '')).trim()
+        if (extractedToken === "") {
+            // console.log("Failed...")
+            // console.log("Token was not provided.")
+            // console.log("************************")
+            return response.status(401).json("User is not authorized or authentication method is different.")
+        }
         // console.log("Adding pure token to request's 'token' property...")
         request['token'] = extractedToken
         // console.log("Done...")
         // console.log("************************")
     } else {
         // console.log("Token extraction from authorization header went wrong.")
-        return response.status(401).json("User is not authorized or authentication method is different.")
     }
 
     next()

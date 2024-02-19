@@ -154,6 +154,7 @@ describe('when there is initially some blogs saved', () => {
             await api
                 .post('/api/blogs')
                 .set('Accept', 'application/json')
+                .set('Authorization', "Bearer ")
                 .send(newBlog)
                 .expect(401)
                 .expect('Content-Type', /application\/json/)
